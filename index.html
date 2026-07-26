@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ruler Before the Result</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Source+Serif+4:ital,opsz,wght@1,8..60,400&display=swap');
+
+  :root{
+    --panel:#1c232b;
+    --panel-deep:#141a20;
+    --paper:#eae6da;
+    --paper-dim:#c9c2ae;
+    --amber:#e2a24a;
+    --amber-dim:#a97a38;
+    --steel:#7a9bb0;
+    --line:#3a4450;
+    --red-flag:#c0644a;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--panel-deep);
+    color:var(--paper);
+    font-family:'Source Serif 4', serif;
+    font-size:18px;
+    line-height:1.65;
+  }
+
+  ::selection{ background:var(--amber); color:#14181c; }
+
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  /* ---------- ruler scroll gauge ---------- */
+  #ruler{
+    position:fixed;
+    top:0; left:0;
+    width:34px;
+    height:100vh;
+    background:linear-gradient(180deg, var(--panel) 0%, var(--panel-deep) 100%);
+    border-right:1px solid var(--line);
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  #ruler .ticks{
+    position:relative;
+    flex:1;
+    width:100%;
+  }
+  #ruler .tick{
+    position:absolute;
+    left:0;
+    width:100%;
+    height:1px;
+    background:var(--line);
+  }
+  #ruler .tick.major{ background:var(--paper-dim); opacity:.5; }
+  #ruler .tick span{
+    position:absolute;
+    left:16px;
+    top:-6px;
+    font-size:9px;
+    color:var(--paper-dim);
+    opacity:.6;
+    letter-spacing:0.05em;
+  }
+  #ruler .needle{
+    position:absolute;
+    left:0;
+    width:100%;
+    height:2px;
+    background:var(--amber);
+    box-shadow:0 0 8px 1px var(--amber);
+    transition:top .05s linear;
+  }
+  @media (max-width:720px){ #ruler{width:14px;} #ruler .tick span{display:none;} }
+
+  main{ margin-left:34px; }
+  @media (max-width:720px){ main{margin-left:14px;} }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:9vh 8vw 8vh;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(226,162,74,0.08), transparent 55%),
+      var(--panel);
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    right:-60px; top:-60px;
+    width:340px; height:340px;
+    border:1px solid var(--line);
+    border-radius:50%;
+    opacity:.35;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    right:20px; top:20px;
+    width:220px; height:220px;
+    border:1px dashed var(--line);
+    border-radius:50%;
+    opacity:.25;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px; height:1px;
+    background:var(--amber);
+    display:inline-block;
+  }
+  h1{
+    font-family:'Source Serif 4', serif;
+    font-weight:700;
+    font-size:clamp(2.4rem, 5vw, 4.1rem);
+    line-height:1.04;
+    margin:0 0 26px;
+    max-width:14ch;
+    color:var(--paper);
+  }
+  .hero p.lede{
+    max-width:56ch;
+    font-size:1.18rem;
+    color:var(--paper-dim);
+    font-style:italic;
+  }
+  .gauge-row{
+    margin-top:56px;
+    display:flex;
+    gap:0;
+    max-width:640px;
+    border-top:1px solid var(--line);
+  }
+  .gauge{
+    flex:1;
+    padding:18px 22px 0;
+    border-right:1px solid var(--line);
+  }
+  .gauge:last-child{ border-right:none; }
+  .gauge .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:1.6rem;
+    color:var(--amber);
+    font-weight:600;
+  }
+  .gauge .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.05em;
+    color:var(--paper-dim);
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+
+  /* ---------- content ---------- */
+  section.mode{
+    padding:7vh 8vw;
+    max-width:900px;
+    border-bottom:1px solid var(--line);
+  }
+  section.mode.intro{ max-width:900px; }
+
+  .mode-tag{
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    margin-bottom:20px;
+  }
+  .mode-index{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--panel-deep);
+    background:var(--amber);
+    padding:3px 10px;
+    border-radius:2px;
+    font-weight:600;
+    letter-spacing:.03em;
+  }
+  .mode-index.zero{ background:var(--steel); }
+  .mode-title{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+  }
+  h2{
+    font-family:'Source Serif 4', serif;
+    font-weight:600;
+    font-size:1.9rem;
+    margin:0 0 20px;
+    color:var(--paper);
+  }
+  p{ margin:0 0 18px; color:var(--paper); }
+  p.dim{ color:var(--paper-dim); }
+  .protocol{
+    margin-top:26px;
+    padding:20px 24px;
+    background:rgba(226,162,74,0.06);
+    border-left:2px solid var(--amber);
+  }
+  .protocol .ptag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:10px;
+    display:block;
+  }
+  .protocol p{ margin-bottom:0; color:var(--paper); }
+
+  em.strong-em{ color:var(--amber); font-style:normal; font-weight:600; }
+
+  /* ---------- ledger table ---------- */
+  .ledger-wrap{
+    padding:7vh 8vw;
+    max-width:1000px;
+  }
+  .ledger-wrap .table-scroll{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .ledger-wrap table{
+    width:100%;
+    min-width:640px;
+    border-collapse:collapse;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    margin-top:28px;
+  }
+  .ledger-wrap th{
+    text-align:left;
+    padding:10px 12px;
+    background:var(--panel);
+    color:var(--amber);
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    font-size:10.5px;
+    border-bottom:1px solid var(--line);
+  }
+  .ledger-wrap td{
+    padding:12px;
+    border-bottom:1px solid var(--line);
+    color:var(--paper-dim);
+    vertical-align:top;
+  }
+  .ledger-wrap tr:hover td{ color:var(--paper); background:rgba(255,255,255,0.02); }
+  .status{
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:2px;
+    display:inline-block;
+    letter-spacing:.03em;
+  }
+  .status.closed{ background:rgba(122,155,176,0.18); color:var(--steel); }
+  .status.rejected{ background:rgba(192,100,74,0.18); color:var(--red-flag); }
+  .status.open{ background:rgba(226,162,74,0.18); color:var(--amber); }
+
+  /* ---------- closure hierarchy ---------- */
+  .hierarchy{
+    padding:7vh 8vw;
+    max-width:900px;
+    border-bottom:1px solid var(--line);
+  }
+  .chain{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0;
+    margin-top:32px;
+    align-items:stretch;
+  }
+  .chain .link{
+    padding:16px 20px;
+    border:1px solid var(--line);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--paper);
+    display:flex;
+    align-items:center;
+    min-width:150px;
+    background:var(--panel);
+  }
+  .chain .link.weak{ color:var(--paper-dim); border-style:dashed; opacity:.75; }
+  .chain .arrow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:36px;
+    height:36px;
+    flex-shrink:0;
+    color:var(--amber);
+    font-size:16px;
+  }
+  @media (max-width:720px){
+    .chain{ flex-direction:column; flex-wrap:nowrap; }
+    .chain .link{ width:100%; }
+    .chain .arrow{ transform:rotate(90deg); margin:2px auto; }
+  }
+
+  /* ---------- closing ---------- */
+  .closing{
+    padding:10vh 8vw;
+    background:var(--panel);
+    text-align:left;
+    max-width:900px;
+    position:relative;
+  }
+  .closing blockquote{
+    margin:0;
+    font-family:'Source Serif 4', serif;
+    font-style:italic;
+    font-size:clamp(1.3rem, 2.4vw, 1.7rem);
+    line-height:1.5;
+    color:var(--paper);
+    max-width:32ch;
+    border-left:2px solid var(--amber);
+    padding-left:28px;
+  }
+  .closing cite{
+    display:block;
+    margin-top:24px;
+    font-family:'IBM Plex Mono', monospace;
+    font-style:normal;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+  }
+
+  footer{
+    padding:5vh 8vw 8vh;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--paper-dim);
+    letter-spacing:.03em;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+
+  a{ color:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    #ruler .needle{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="ruler" aria-hidden="true"><div class="ticks" id="ticks"></div></div>
+
+<main>
+
+  <section class="hero">
+    <div class="eyebrow">Verification Protocol · v2</div>
+    <h1>The Ruler Before the Result</h1>
+    <p class="lede">A calibration protocol for AI-assisted R&amp;D — treating language models the way you'd treat any instrument that drifts: useful, fast, and in need of a ruler you trust more than the device itself.</p>
+
+    <div class="gauge-row">
+      <div class="gauge"><div class="num">7</div><div class="label">Failure modes</div></div>
+      <div class="gauge"><div class="num">1</div><div class="label">Verification ledger</div></div>
+      <div class="gauge"><div class="num">0</div><div class="label">Orphan claims allowed</div></div>
+    </div>
+  </section>
+
+  <section class="mode intro">
+    <p>AI language models are increasingly used in R&amp;D workflows — literature review, citation gathering, drafting, cross-checking claims against prior work. They are fast, cheap, and genuinely useful. They also fabricate with total confidence, and the fabrications are not random noise; they cluster in specific, predictable patterns that a casual review will not catch.</p>
+    <p class="dim">This is not a reason to avoid using them. It is a reason to build a verification protocol as rigorous as any other instrument calibration procedure, and to treat that protocol as part of the research method, not an afterthought.</p>
+
+    <p style="margin-top:32px; padding-top:32px; border-top:1px solid var(--line);">Here's the shape of the problem in plain terms: ask an AI system to find you three sources backing up a claim, and it will often hand you three sources that sound perfect — right journal, right authors, right numbers — and one of them doesn't say what it's credited with saying, or doesn't exist in the form claimed at all. Nothing about the output <em class="strong-em">looks</em> wrong. That's the whole issue. A mistake you can spot by reading it isn't dangerous. A mistake that reads exactly like a correct answer is.</p>
+  </section>
+
+  <section class="mode">
+    <div class="mode-tag">
+      <span class="mode-index zero">00</span>
+      <span class="mode-title">Failure Mode</span>
+    </div>
+    <h2>Source laundering</h2>
+    <p>The most common error isn't inventing a paper outright — it's laundering a secondary claim into a primary fact. A review article cites a benchmark; the model cites the review as though it were the original experimental evidence. Or the model summarizes five papers that all ultimately trace back to the same underlying experiment, creating the illusion of independent support where there is one measurement, cited five times.</p>
+    <p class="dim" style="font-size:0.98rem;">Say you're checking a nutrition claim. Five recent articles all state it confidently. Ask where each got the number, and all five trace back to a single 2019 study — some citing it directly, some citing another article that cited it. You didn't find five confirmations. You found an echo, five rooms deep, of one result that may or may not hold up.</p>
+    <div class="protocol">
+      <span class="ptag">Protocol</span>
+      <p>For any claim central to a design decision, trace it to its evidentiary root — the original measurement or experiment later citations depend on. Multiple summaries of the same experiment do not constitute multiple independent observations.</p>
+    </div>
+  </section>
+
+  <section class="mode">
+    <div class="mode-tag">
+      <span class="mode-index">01</span>
+      <span class="mode-title">Failure Mode</span>
+    </div>
+    <h2>Citation hallucination — and the quote that isn't there</h2>
+    <p>The most dangerous fabrications don't look wrong. A model asked for supporting literature may return a citation that's subtly incorrect — right topic, wrong authors, wrong journal, or a <strong>DOI</strong> (Digital Object Identifier — a permanent, unique string assigned to a published paper, which resolves at <span class="mono">doi.org</span> straight to the actual source) that resolves to an unrelated paper. These pass a skim review because they <em class="strong-em">look</em> like real citations and only fail under direct verification.</p>
+    <p>A DOI resolving to the right paper is <em class="strong-em">necessary but not sufficient</em>. Models increasingly cite a real, correct paper — and attribute a claim, figure, or number to it that the paper never made, or that lives in a different figure than the one cited. The paper is real; the quote is fake.</p>
+    <div class="protocol">
+      <span class="ptag">Protocol — DOI-gate, two steps</span>
+      <p><strong>Step A:</strong> Every DOI a claim depends on must independently resolve to the claimed title and authors before the claim leaves draft status. <strong>Step B:</strong> the specific number, quote, or figure must be matched to its exact location in the source — page, table, or figure — not just confirmed to exist somewhere in the paper.</p>
+      <p style="margin-top:14px;">This requires a <em class="strong-em">primary-source handshake</em>: when verifying a claim, supply the source document itself into the same context as the verification task, and require the system to quote the specific passage. Then check that passage against the original yourself. A model confirming a claim from memory is not verification — it's a second unverified claim.</p>
+    </div>
+  </section>
+
+  <section class="mode">
+    <div class="mode-tag">
+      <span class="mode-index">02</span>
+      <span class="mode-title">Failure Mode</span>
+    </div>
+    <h2>Correlated instrument agreement</h2>
+    <p>Using multiple AI systems to cross-check each other is good practice, but it has a specific failure mode: if the systems share similar training data or similar tendencies, their agreement is not independent confirmation. Five models converging on a claim can be five correlated instruments reporting the same underlying error — five thermometers from the same manufacturing batch, not five independent readings.</p>
+    <div class="protocol">
+      <span class="ptag">Protocol</span>
+      <p>Treat agreement as evidence only after estimating independence — plausibly independent observations agreeing is informative; correlated systems agreeing is one opinion wearing several coats. Where possible, pair a generative model with a deterministic, non-generative source — a citation index or database — rather than stacking more chat interfaces.</p>
+    </div>
+  </section>
+
+  <section class="mode">
+    <div class="mode-tag">
+      <span class="mode-index">03</span>
+      <span class="mode-title">Failure Mode</span>
+    </div>
+    <h2>The closed-loop trap</h2>
+    <p>A subtler failure: a system asked to resolve an open verification item sometimes completes the loop itself — supplying the missing data, marking the item resolved, and presenting the whole thing as settled. This looks like progress. It's the system grading its own homework. An open flag resolved by the same class of system that raised it isn't resolved; it's been given a coat of paint.</p>
+    <div class="protocol">
+      <span class="ptag">Protocol — closure hierarchy</span>
+      <p>Put simply: whoever raises a concern shouldn't be the one who gets to decide it's resolved. A flagged item can only be closed by something higher in this chain than what raised it. AI-only closure of an AI-raised flag stays provisional, never final.</p>
+    </div>
+  </section>
+
+  <section class="hierarchy">
+    <p class="dim" style="margin-top:0;">Closure authority, ranked — the thing itself (a paper, a dataset, the original code) outranks any system merely reporting on it. An AI-raised flag starts <em class="strong-em">below</em> every rung here — it can only be closed by climbing up, never by another system at its own level:</p>
+    <div class="chain">
+      <div class="link weak" style="border-color:var(--red-flag); color:var(--red-flag);">AI-raised flag<br><span style="opacity:.7;">(origin — lowest authority)</span></div>
+      <div class="arrow">→</div>
+      <div class="link">Primary source<br>(document, dataset, code)</div>
+      <div class="arrow">→</div>
+      <div class="link">Reproducible computation</div>
+      <div class="arrow">→</div>
+      <div class="link">Human domain expert</div>
+      <div class="arrow">→</div>
+      <div class="link weak">Independent retrieval system<br><span style="opacity:.7;">(weakest closer)</span></div>
+    </div>
+  </section>
+
+  <section class="mode">
+    <div class="mode-tag">
+      <span class="mode-index">04</span>
+      <span class="mode-title">Failure Mode</span>
+    </div>
+    <h2>False precision</h2>
+    <p>Models compress uncertainty into confident prose. They routinely present tentative conclusions, estimated values, or inferred mechanisms with more certainty than the evidence supports — "this is almost certainly," attached to something genuinely uncertain.</p>
+    <div class="protocol">
+      <span class="ptag">Protocol — claim tagging</span>
+      <p>Every substantive claim carries an explicit status: <strong>directly supported</strong>, <strong>inferential</strong>, <strong>speculative</strong>, or <strong>unverified</strong>. This is separate from citation-checking — it's checking whether the citation actually supports the strength of the claim being made on top of it.</p>
+    </div>
+  </section>
+
+  <section class="mode">
+    <div class="mode-tag">
+      <span class="mode-index">05</span>
+      <span class="mode-title">Failure Mode</span>
+    </div>
+    <h2>Silent computational error</h2>
+    <p>AI-generated code and derivations often run cleanly while computing the wrong thing — a dropped NaN, an off-by-one index, a misapplied statistical test. Clean execution is not correctness.</p>
+    <div class="protocol">
+      <span class="ptag">Protocol</span>
+      <p>Before running AI-generated code or analysis on real experimental data, run it against a small synthetic dataset with a known, hand-calculated expected output. If the code can't reproduce the known answer, it doesn't get near the real one.</p>
+    </div>
+  </section>
+
+  <section class="mode">
+    <div class="mode-tag">
+      <span class="mode-index">06</span>
+      <span class="mode-title">Failure Mode</span>
+    </div>
+    <h2>Leading the witness</h2>
+    <p>A prompt framed as "find evidence that X" tends to return evidence for X — regardless of the actual balance of support in the literature. This happens before verification even starts: it shapes what gets generated in the first place, so no amount of downstream citation-checking catches it. The claim can be perfectly cited and still be a one-sided answer to a leading question.</p>
+    <div class="protocol">
+      <span class="ptag">Protocol — run it twice</span>
+      <p>For any claim carrying real weight, query it twice — once seeking support, once seeking refutation. A system that can't produce a credible case against its own prior answer is a sign the "for" case was never really tested either; it was just generated to spec.</p>
+    </div>
+  </section>
+
+  <section class="mode">
+    <div class="mode-tag">
+      <span class="mode-index">◆</span>
+      <span class="mode-title">Scope &amp; disclosure</span>
+    </div>
+    <h2>Attention, versioning, and honest disclosure</h2>
+    <p>AI collaboration makes exploration cheap, which makes it easy to run many parallel threads at once — broad, shallow coverage rather than depth on any one. <strong>Define kill conditions in advance:</strong> before starting a sub-project, write the specific, measurable condition under which it gets shelved or declared complete.</p>
+    <p>Verification is tied to a specific draft and date, not evergreen — a modified claim needs re-verification, and the specific model version and date of interaction should be logged, since the same prompt to the same named model months apart can produce different output.</p>
+    <p class="dim">Disclose AI involvement by <em class="strong-em">function</em>, not by vague percentage: literature discovery, drafting, editing, adversarial review, numerical cross-checking, code generation. This lets a reader calibrate exactly how much independent scrutiny each part deserves.</p>
+  </section>
+
+  <section class="ledger-wrap">
+    <div class="mode-tag">
+      <span class="mode-index">◆</span>
+      <span class="mode-title">Operational artifact</span>
+    </div>
+    <h2>The verification ledger</h2>
+    <p class="dim">One table, not four parallel tracking systems. Every claim gets a row — <strong>Status</strong> tracks where the claim is in the verification process; <strong>Strength</strong> tracks how much weight it can bear once that process is done. A claim can be Closed and still tagged Inferential.</p>
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Claim</th>
+          <th>Source (DOI)</th>
+          <th>Exact location</th>
+          <th>Method</th>
+          <th>Status</th>
+          <th>Strength</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bandgap = 1.42 eV</td>
+          <td class="mono">10.1038/xxxxx</td>
+          <td>Fig. 3b</td>
+          <td>Primary-source handshake</td>
+          <td><span class="status closed">Closed</span></td>
+          <td>Directly supported</td>
+        </tr>
+        <tr>
+          <td>Yield increase +15%</td>
+          <td class="mono">10.1016/xxxxx</td>
+          <td>Not found in source</td>
+          <td>Direct PDF inspection</td>
+          <td><span class="status rejected">Rejected</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Endurance &gt;10⁸ cycles</td>
+          <td class="mono">10.1002/xxxxx</td>
+          <td>Table 2, row 4</td>
+          <td>Expert review pending</td>
+          <td><span class="status open">Open</span></td>
+          <td>Unverified</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="closing">
+    <blockquote>
+      The purpose of verification is not to prove that AI is trustworthy. It is to ensure that no conclusion depends on trust in AI at all.
+      <cite>No orphan claims — every assertion is tied to a verified source, a reproducible derivation, or is labeled as conjecture.</cite>
+    </blockquote>
+  </section>
+
+  <footer>
+    <span>CC0 — no rights reserved. Free to reuse, adapt, or redistribute.</span>
+    <span>The Ruler Before the Result — Verification Protocol for AI-Assisted R&amp;D, v2</span>
+  </footer>
+
+</main>
+
+<script>
+  const ticksEl = document.getElementById('ticks');
+  const ruler = document.getElementById('ruler');
+  const totalTicks = 40;
+  for(let i=0;i<=totalTicks;i++){
+    const t = document.createElement('div');
+    const pct = (i/totalTicks)*100;
+    const major = i % 5 === 0;
+    t.className = 'tick' + (major ? ' major' : '');
+    t.style.top = pct + '%';
+    if(major){
+      const s = document.createElement('span');
+      s.textContent = i;
+      t.appendChild(s);
+    }
+    ticksEl.appendChild(t);
+  }
+  const needle = document.createElement('div');
+  needle.className = 'needle';
+  ruler.appendChild(needle);
+
+  function updateNeedle(){
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop/docHeight)*100 : 0;
+    needle.style.top = pct + '%';
+  }
+  window.addEventListener('scroll', updateNeedle, {passive:true});
+  updateNeedle();
+</script>
+
+</body>
+</html>
