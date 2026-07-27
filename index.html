@@ -220,7 +220,7 @@
   }
   .protocol .ptag{
     font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
+    font-size:12px;
     letter-spacing:.12em;
     text-transform:uppercase;
     color:var(--amber);
@@ -242,7 +242,7 @@
   }
   .ledger-wrap table{
     width:100%;
-    min-width:640px;
+    min-width:820px;
     border-collapse:collapse;
     font-family:'IBM Plex Mono', monospace;
     font-size:12.5px;
@@ -266,7 +266,7 @@
   }
   .ledger-wrap tr:hover td{ color:var(--paper); background:rgba(255,255,255,0.02); }
   .status{
-    font-size:11px;
+    font-size:12px;
     padding:2px 8px;
     border-radius:2px;
     display:inline-block;
@@ -314,7 +314,7 @@
   @media (max-width:720px){
     .chain{ flex-direction:column; flex-wrap:nowrap; }
     .chain .link{ width:100%; }
-    .chain .arrow{ transform:rotate(90deg); margin:2px auto; }
+    .chain .arrow{ transform:rotate(90deg); margin:2px auto; align-self:center; }
   }
 
   /* ---------- closing ---------- */
@@ -498,6 +498,7 @@
     <div class="protocol">
       <span class="ptag">Protocol — run it twice</span>
       <p>For any claim carrying real weight, query it twice — once seeking support, once seeking refutation. A system that can't produce a credible case against its own prior answer is a sign the "for" case was never really tested either; it was just generated to spec.</p>
+      <p style="margin-top:14px;">Watch for the failure mode inside the fix: a weak, generic refutation is not evidence the claim is solid — it can just as easily mean the refutation pass wasn't taken seriously either. This step earns its keep only if the objections it returns are specific enough to actually threaten the claim, not just plausible-sounding.</p>
     </div>
   </section>
 
@@ -518,7 +519,7 @@
       <span class="mode-title">Operational artifact</span>
     </div>
     <h2>The verification ledger</h2>
-    <p class="dim">One table, not four parallel tracking systems. Every claim gets a row — <strong>Status</strong> tracks where the claim is in the verification process; <strong>Strength</strong> tracks how much weight it can bear once that process is done. A claim can be Closed and still tagged Inferential.</p>
+    <p class="dim">One table, not four parallel tracking systems. Every claim gets a row — <strong>Status</strong> tracks where the claim is in the verification process; <strong>Strength</strong> tracks how much weight it can bear once that process is done; <strong>Discrepancy</strong> tracks the nature of any divergence found — a wrong scalar reads very differently from an inverted claim, and the pattern across many rows can reveal a model's systematic blind spots. A claim can be Closed and still tagged Inferential.</p>
     <div class="table-scroll">
     <table>
       <thead>
@@ -529,6 +530,7 @@
           <th>Method</th>
           <th>Status</th>
           <th>Strength</th>
+          <th>Discrepancy</th>
         </tr>
       </thead>
       <tbody>
@@ -539,14 +541,16 @@
           <td>Primary-source handshake</td>
           <td><span class="status closed">Closed</span></td>
           <td>Directly supported</td>
+          <td>—</td>
         </tr>
         <tr>
           <td>Yield increase +15%</td>
           <td class="mono">10.1016/xxxxx</td>
-          <td>Not found in source</td>
+          <td>Table 4</td>
           <td>Direct PDF inspection</td>
           <td><span class="status rejected">Rejected</span></td>
           <td>—</td>
+          <td>Inverted claim — source reports a <em class="strong-em">decrease</em> of 8%</td>
         </tr>
         <tr>
           <td>Endurance &gt;10⁸ cycles</td>
@@ -555,6 +559,16 @@
           <td>Expert review pending</td>
           <td><span class="status open">Open</span></td>
           <td>Unverified</td>
+          <td>Pending</td>
+        </tr>
+        <tr>
+          <td>Thermal conductivity ~2000 W/m·K</td>
+          <td class="mono">10.1021/xxxxx</td>
+          <td>Sec. 3.2</td>
+          <td>Primary-source handshake</td>
+          <td><span class="status closed">Closed</span></td>
+          <td>Inferential</td>
+          <td>Partial — source reports this value for a related but non-identical sample geometry</td>
         </tr>
       </tbody>
     </table>
