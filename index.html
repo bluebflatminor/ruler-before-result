@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
 <title>The Ruler Before the Result — Verification Protocol Toolkit</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
 <style>
@@ -25,15 +26,16 @@
   }
 
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; background: var(--bg-deep); color-scheme: dark; }
 
   body {
     margin: 0;
-    background: var(--bg-deep);
+    background: var(--bg-deep) !important;
     color: var(--text);
     font-family: 'Source Serif 4', serif;
     line-height: 1.6;
     font-size: 15px;
+    color-scheme: dark;
   }
 
   .mono { font-family: 'IBM Plex Mono', monospace; }
@@ -147,7 +149,6 @@
   .vpt-panel { display: none; padding: 0; }
   .vpt-panel.active { display: block; }
 
-  /* Overview */
   .vpt-hero {
     padding: 28px 32px;
     border-bottom: 1px solid var(--border);
@@ -155,7 +156,6 @@
   .vpt-hero p { margin: 0 0 14px; color: var(--text-dim); }
   .vpt-hero p:last-child { margin-bottom: 0; }
 
-  /* Failure modes */
   .vpt-mode {
     padding: 24px 32px;
     border-bottom: 1px solid var(--border);
@@ -244,7 +244,6 @@
     white-space: nowrap;
   }
 
-  /* Triage */
   .vpt-triage { padding: 28px 32px; }
   .vpt-triage h3 {
     font-family: 'Source Serif 4', serif;
@@ -327,17 +326,25 @@
     justify-content: space-between;
     padding: 6px 0;
     border-bottom: 1px dashed var(--border-dim);
+    gap: 16px;
   }
   .vpt-triage-result .result-row:last-child { border-bottom: none; }
-  .vpt-triage-result .result-val { color: var(--text); }
+  .vpt-triage-result .result-val { color: var(--text); text-align: right; }
+  .vpt-triage-add {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .vpt-triage-add.visible { display: block; }
 
-  /* Ledger */
   .vpt-ledger { padding: 24px 32px; }
   .vpt-ledger-controls {
     display: flex;
     gap: 10px;
     margin-bottom: 16px;
     flex-wrap: wrap;
+    align-items: center;
   }
   .vpt-btn {
     font-family: 'IBM Plex Mono', monospace;
@@ -355,6 +362,13 @@
   .vpt-btn:hover { border-color: var(--amber); color: var(--amber); }
   .vpt-btn.primary { background: var(--amber); color: var(--bg-deep); border-color: var(--amber); font-weight: 600; }
   .vpt-btn.primary:hover { background: var(--amber-dim); }
+  .vpt-save-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-left: auto;
+  }
+  .vpt-save-status.saved { color: var(--green); }
 
   .vpt-table-wrap {
     overflow-x: auto;
@@ -387,6 +401,11 @@
   }
   .vpt-table tr:hover td { color: var(--text); background: rgba(255,255,255,0.02); }
   .vpt-table tr:last-child td { border-bottom: none; }
+  .vpt-table tr.just-added { animation: flashIn 1.2s ease; }
+  @keyframes flashIn {
+    from { background: rgba(226,162,74,0.25); }
+    to { background: transparent; }
+  }
   .vpt-table input, .vpt-table select {
     background: var(--bg-deep);
     border: 1px solid var(--border);
@@ -424,7 +443,6 @@
   }
   .vpt-delete-row:hover { color: var(--red); background: rgba(192,100,74,0.1); }
 
-  /* Export */
   .vpt-export { padding: 28px 32px; }
   .vpt-export h3 {
     font-family: 'Source Serif 4', serif;
@@ -478,11 +496,11 @@
   <div class="vpt-header">
     <div class="vpt-eyebrow">Verification Protocol · Toolkit Edition</div>
     <h1>The Ruler Before the Result</h1>
-    <p class="subtitle">A calibration protocol for AI-assisted R&D — now with triage rules, cost estimates, and an interactive ledger. Treat models like instruments that drift: useful, fast, and in need of a ruler you trust more.</p>
+    <p class="subtitle">A calibration protocol for AI-assisted R&D — now with triage rules, cost estimates, and a persistent, linked ledger. Treat models like instruments that drift: useful, fast, and in need of a ruler you trust more.</p>
     <div class="vpt-gauges">
       <div class="vpt-gauge"><div class="num">7</div><div class="label">Failure modes</div></div>
       <div class="vpt-gauge"><div class="num">3</div><div class="label">Triage levels</div></div>
-      <div class="vpt-gauge"><div class="num">1</div><div class="label">Live ledger</div></div>
+      <div class="vpt-gauge"><div class="num">1</div><div class="label">Persistent ledger</div></div>
     </div>
   </div>
 
@@ -498,7 +516,7 @@
   <div id="panel-overview" class="vpt-panel active">
     <div class="vpt-hero">
       <p>AI language models are fast, cheap, and genuinely useful in R&D workflows. They also fabricate with total confidence, and the fabrications cluster in specific, predictable patterns. This toolkit addresses the gap between knowing that and doing something about it.</p>
-      <p>What changed from the manifesto: <strong>triage</strong> (not every claim needs full DOI resolution), <strong>cost estimates</strong> (time per verification step), <strong>checklists</strong> (not just principles), and a <strong>working ledger</strong> (not a static example).</p>
+      <p>What changed from the manifesto: <strong>triage</strong> (not every claim needs full DOI resolution), <strong>cost estimates</strong> (time per verification step), <strong>checklists</strong> (not just principles), and a <strong>persistent, linked ledger</strong> (saved to this browser, and directly reachable from the Triage tab — not a static example).</p>
       <p style="color: var(--text-faint); font-size: 0.9rem; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">Core rule: No orphan claims. Every assertion is tied to a verified source, a reproducible derivation, or is explicitly labeled as conjecture.</p>
     </div>
     <div class="vpt-mode">
@@ -507,10 +525,11 @@
         <span class="vpt-mode-title">How to use this toolkit</span>
       </div>
       <h3>Start with Triage, end with the Ledger</h3>
-      <p>1. <strong>Triage Calculator</strong> — Classify your claim as P0 (design-critical), P1 (supporting), or P2 (background). This determines verification depth and time budget.</p>
-      <p>2. <strong>Failure Modes</strong> — Run through the relevant checklists for your claim type. Check items off as you complete them.</p>
-      <p>3. <strong>Verification Ledger</strong> — Log every claim, its source, exact location, and status. Edit in-place. Add rows as you go.</p>
+      <p>1. <strong>Triage Calculator</strong> — Classify your claim as P0 (design-critical), P1 (supporting), or P2 (background). Click "Add to Ledger" to create a pre-filled row and jump straight to it.</p>
+      <p>2. <strong>Failure Modes</strong> — Run through the relevant checklists for your claim type. Checkbox progress is saved automatically.</p>
+      <p>3. <strong>Verification Ledger</strong> — Log every claim, its source, exact location, and status. Edit in-place. Everything here autosaves to this browser — reload the page and it's still here.</p>
       <p>4. <strong>Export</strong> — Dump the ledger as Markdown or CSV for your paper's supplementary materials.</p>
+      <p style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-faint);">Note: the ledger and checklist state are saved in this browser's local storage, on this device. They won't follow you to another computer, and clearing your browser data will clear them. Use Export regularly if the ledger needs to survive that.</p>
     </div>
   </div>
 
@@ -524,10 +543,10 @@
         <span class="ptag">Protocol — Trace to root</span>
         <p>For any claim central to a design decision, trace it to its evidentiary root — the original measurement or experiment later citations depend on.</p>
         <ul class="vpt-checklist">
-          <li><input type="checkbox" id="m0-1"><label for="m0-1">Identify the earliest cited source in the chain</label><span class="cost">~5 min</span></li>
-          <li><input type="checkbox" id="m0-2"><label for="m0-2">Check if later citations are summaries or replications</label><span class="cost">~10 min</span></li>
-          <li><input type="checkbox" id="m0-3"><label for="m0-3">Confirm the original study actually contains the claimed measurement</label><span class="cost">~15 min</span></li>
-          <li><input type="checkbox" id="m0-4"><label for="m0-4">Log whether support is single-source or independent</label><span class="cost">~2 min</span></li>
+          <li><input type="checkbox" id="m0-1" onchange="saveChecklist()"><label for="m0-1">Identify the earliest cited source in the chain</label><span class="cost">~5 min</span></li>
+          <li><input type="checkbox" id="m0-2" onchange="saveChecklist()"><label for="m0-2">Check if later citations are summaries or replications</label><span class="cost">~10 min</span></li>
+          <li><input type="checkbox" id="m0-3" onchange="saveChecklist()"><label for="m0-3">Confirm the original study actually contains the claimed measurement</label><span class="cost">~15 min</span></li>
+          <li><input type="checkbox" id="m0-4" onchange="saveChecklist()"><label for="m0-4">Log whether support is single-source or independent</label><span class="cost">~2 min</span></li>
         </ul>
       </div>
     </div>
@@ -540,11 +559,11 @@
         <span class="ptag">Protocol — DOI-gate, two steps</span>
         <p><strong>Step A:</strong> Every DOI must independently resolve to the claimed title and authors. <strong>Step B:</strong> The specific number, quote, or figure must be matched to its exact location — page, table, or figure.</p>
         <ul class="vpt-checklist">
-          <li><input type="checkbox" id="m1-1"><label for="m1-1">Resolve DOI at doi.org; verify title and authors match</label><span class="cost">~3 min</span></li>
-          <li><input type="checkbox" id="m1-2"><label for="m1-2">Open the PDF (not the abstract)</label><span class="cost">~2 min</span></li>
-          <li><input type="checkbox" id="m1-3"><label for="m1-3">Locate the exact figure, table, or paragraph cited</label><span class="cost">~10 min</span></li>
-          <li><input type="checkbox" id="m1-4"><label for="m1-4">Copy the specific passage into the ledger, verbatim</label><span class="cost">~3 min</span></li>
-          <li><input type="checkbox" id="m1-5"><label for="m1-5">For AI-supplied quotes: require the model to cite the passage with source in context</label><span class="cost">~5 min</span></li>
+          <li><input type="checkbox" id="m1-1" onchange="saveChecklist()"><label for="m1-1">Resolve DOI at doi.org; verify title and authors match</label><span class="cost">~3 min</span></li>
+          <li><input type="checkbox" id="m1-2" onchange="saveChecklist()"><label for="m1-2">Open the PDF (not the abstract)</label><span class="cost">~2 min</span></li>
+          <li><input type="checkbox" id="m1-3" onchange="saveChecklist()"><label for="m1-3">Locate the exact figure, table, or paragraph cited</label><span class="cost">~10 min</span></li>
+          <li><input type="checkbox" id="m1-4" onchange="saveChecklist()"><label for="m1-4">Copy the specific passage into the ledger, verbatim</label><span class="cost">~3 min</span></li>
+          <li><input type="checkbox" id="m1-5" onchange="saveChecklist()"><label for="m1-5">For AI-supplied quotes: require the model to cite the passage with source in context</label><span class="cost">~5 min</span></li>
         </ul>
       </div>
     </div>
@@ -556,9 +575,9 @@
       <div class="vpt-protocol">
         <span class="ptag">Protocol — Pair generative with deterministic</span>
         <ul class="vpt-checklist">
-          <li><input type="checkbox" id="m2-1"><label for="m2-1">Cross-check against a non-generative source (Crossref, PubMed, Semantic Scholar)</label><span class="cost">~5 min</span></li>
-          <li><input type="checkbox" id="m2-2"><label for="m2-2">If using multiple LLMs, choose ones with different training data cutoffs and architectures</label><span class="cost">~5 min</span></li>
-          <li><input type="checkbox" id="m2-3"><label for="m2-3">Treat agreement as evidence only after estimating independence</label><span class="cost">~3 min</span></li>
+          <li><input type="checkbox" id="m2-1" onchange="saveChecklist()"><label for="m2-1">Cross-check against a non-generative source (Crossref, PubMed, Semantic Scholar)</label><span class="cost">~5 min</span></li>
+          <li><input type="checkbox" id="m2-2" onchange="saveChecklist()"><label for="m2-2">If using multiple LLMs, choose ones with different training data cutoffs and architectures</label><span class="cost">~5 min</span></li>
+          <li><input type="checkbox" id="m2-3" onchange="saveChecklist()"><label for="m2-3">Treat agreement as evidence only after estimating independence</label><span class="cost">~3 min</span></li>
         </ul>
       </div>
     </div>
@@ -571,10 +590,10 @@
         <span class="ptag">Protocol — Closure hierarchy</span>
         <p>Whoever raises a concern shouldn't be the one who decides it's resolved. AI-only closure of an AI-raised flag stays provisional, never final.</p>
         <ul class="vpt-checklist">
-          <li><input type="checkbox" id="m3-1"><label for="m3-1">Log who (or what) raised the flag</label><span class="cost">~1 min</span></li>
-          <li><input type="checkbox" id="m3-2"><label for="m3-2">Ensure the closer is higher in the chain than the raiser</label><span class="cost">~2 min</span></li>
-          <li><input type="checkbox" id="m3-3"><label for="m3-3">If closed by AI, mark status "Provisional" not "Closed"</label><span class="cost">~1 min</span></li>
-          <li><input type="checkbox" id="m3-4"><label for="m3-4">Human or primary-source closure required for P0 claims</label><span class="cost">~0 min</span></li>
+          <li><input type="checkbox" id="m3-1" onchange="saveChecklist()"><label for="m3-1">Log who (or what) raised the flag</label><span class="cost">~1 min</span></li>
+          <li><input type="checkbox" id="m3-2" onchange="saveChecklist()"><label for="m3-2">Ensure the closer is higher in the chain than the raiser</label><span class="cost">~2 min</span></li>
+          <li><input type="checkbox" id="m3-3" onchange="saveChecklist()"><label for="m3-3">If closed by AI, mark status "Provisional" not "Closed"</label><span class="cost">~1 min</span></li>
+          <li><input type="checkbox" id="m3-4" onchange="saveChecklist()"><label for="m3-4">Human or primary-source closure required for P0 claims</label><span class="cost">~0 min</span></li>
         </ul>
       </div>
     </div>
@@ -586,9 +605,9 @@
       <div class="vpt-protocol">
         <span class="ptag">Protocol — Claim tagging</span>
         <ul class="vpt-checklist">
-          <li><input type="checkbox" id="m4-1"><label for="m4-1">Tag every substantive claim: Directly supported / Inferential / Speculative / Unverified</label><span class="cost">~2 min</span></li>
-          <li><input type="checkbox" id="m4-2"><label for="m4-2">Check whether the citation supports the strength of the claim being made</label><span class="cost">~5 min</span></li>
-          <li><input type="checkbox" id="m4-3"><label for="m4-3">Downgrade confidence tags when passing through summaries or reviews</label><span class="cost">~2 min</span></li>
+          <li><input type="checkbox" id="m4-1" onchange="saveChecklist()"><label for="m4-1">Tag every substantive claim: Directly supported / Inferential / Speculative / Unverified</label><span class="cost">~2 min</span></li>
+          <li><input type="checkbox" id="m4-2" onchange="saveChecklist()"><label for="m4-2">Check whether the citation supports the strength of the claim being made</label><span class="cost">~5 min</span></li>
+          <li><input type="checkbox" id="m4-3" onchange="saveChecklist()"><label for="m4-3">Downgrade confidence tags when passing through summaries or reviews</label><span class="cost">~2 min</span></li>
         </ul>
       </div>
     </div>
@@ -600,10 +619,10 @@
       <div class="vpt-protocol">
         <span class="ptag">Protocol — Synthetic ground truth</span>
         <ul class="vpt-checklist">
-          <li><input type="checkbox" id="m5-1"><label for="m5-1">Construct a minimal synthetic dataset with a known, hand-calculated expected output</label><span class="cost">~20 min</span></li>
-          <li><input type="checkbox" id="m5-2"><label for="m5-2">Run the AI-generated code against this dataset first</label><span class="cost">~5 min</span></li>
-          <li><input type="checkbox" id="m5-3"><label for="m5-3">If the output doesn't match the hand-calculated result, debug before touching real data</label><span class="cost">~varies</span></li>
-          <li><input type="checkbox" id="m5-4"><label for="m5-4">Log the synthetic test case and expected result in the ledger</label><span class="cost">~3 min</span></li>
+          <li><input type="checkbox" id="m5-1" onchange="saveChecklist()"><label for="m5-1">Construct a minimal synthetic dataset with a known, hand-calculated expected output</label><span class="cost">~20 min</span></li>
+          <li><input type="checkbox" id="m5-2" onchange="saveChecklist()"><label for="m5-2">Run the AI-generated code against this dataset first</label><span class="cost">~5 min</span></li>
+          <li><input type="checkbox" id="m5-3" onchange="saveChecklist()"><label for="m5-3">If the output doesn't match the hand-calculated result, debug before touching real data</label><span class="cost">~varies</span></li>
+          <li><input type="checkbox" id="m5-4" onchange="saveChecklist()"><label for="m5-4">Log the synthetic test case and expected result in the ledger</label><span class="cost">~3 min</span></li>
         </ul>
       </div>
     </div>
@@ -615,10 +634,10 @@
       <div class="vpt-protocol">
         <span class="ptag">Protocol — Run it twice</span>
         <ul class="vpt-checklist">
-          <li><input type="checkbox" id="m6-1"><label for="m6-1">Query once seeking support, once seeking refutation</label><span class="cost">~10 min</span></li>
-          <li><input type="checkbox" id="m6-2"><label for="m6-2">Evaluate whether the refutation is specific enough to actually threaten the claim</label><span class="cost">~10 min</span></li>
-          <li><input type="checkbox" id="m6-3"><label for="m6-3">If the model can't produce a credible opposing case, treat the "for" case as untested</label><span class="cost">~5 min</span></li>
-          <li><input type="checkbox" id="m6-4"><label for="m6-4">Log both query prompts and summary responses in the ledger</label><span class="cost">~5 min</span></li>
+          <li><input type="checkbox" id="m6-1" onchange="saveChecklist()"><label for="m6-1">Query once seeking support, once seeking refutation</label><span class="cost">~10 min</span></li>
+          <li><input type="checkbox" id="m6-2" onchange="saveChecklist()"><label for="m6-2">Evaluate whether the refutation is specific enough to actually threaten the claim</label><span class="cost">~10 min</span></li>
+          <li><input type="checkbox" id="m6-3" onchange="saveChecklist()"><label for="m6-3">If the model can't produce a credible opposing case, treat the "for" case as untested</label><span class="cost">~5 min</span></li>
+          <li><input type="checkbox" id="m6-4" onchange="saveChecklist()"><label for="m6-4">Log both query prompts and summary responses in the ledger</label><span class="cost">~5 min</span></li>
         </ul>
       </div>
     </div>
@@ -628,7 +647,7 @@
   <div id="panel-triage" class="vpt-panel">
     <div class="vpt-triage">
       <h3>Claim Triage</h3>
-      <p class="desc">Not every claim deserves the same scrutiny. Select the level that matches the claim's role in your argument. This sets the verification budget and required closure authority.</p>
+      <p class="desc">Not every claim deserves the same scrutiny. Select the level that matches the claim's role in your argument. This sets the verification budget and required closure authority — and can create a matching row in your ledger.</p>
       <div class="vpt-triage-grid">
         <div class="vpt-triage-card p0" onclick="selectTriage('p0', this)">
           <div class="level">Priority 0 — Design-critical</div>
@@ -667,6 +686,9 @@
         <div class="result-row"><span>Closure authority</span><span class="result-val" id="tr-closure">—</span></div>
         <div class="result-row"><span>Time budget</span><span class="result-val" id="tr-time">—</span></div>
         <div class="result-row"><span>Ledger fields required</span><span class="result-val" id="tr-fields">—</span></div>
+        <div class="vpt-triage-add" id="triage-add">
+          <button class="vpt-btn primary" onclick="addTriagedClaim()">+ Add This Claim to Ledger</button>
+        </div>
       </div>
     </div>
   </div>
@@ -678,12 +700,14 @@
         <button class="vpt-btn primary" onclick="addLedgerRow()">+ Add Claim</button>
         <button class="vpt-btn" onclick="clearLedger()">Clear All</button>
         <button class="vpt-btn" onclick="loadDemoData()">Load Demo Data</button>
+        <span class="vpt-save-status" id="save-status">Saved to this browser</span>
       </div>
       <div class="vpt-table-wrap">
         <table class="vpt-table" id="ledger-table">
           <thead>
             <tr>
               <th>Claim</th>
+              <th>Priority</th>
               <th>Source (DOI)</th>
               <th>Exact Location</th>
               <th>Method</th>
@@ -703,7 +727,7 @@
   <div id="panel-export" class="vpt-panel">
     <div class="vpt-export">
       <h3>Export Ledger</h3>
-      <p class="desc">Copy the current ledger state as Markdown or CSV for your paper's supplementary materials, or for import into a reference manager.</p>
+      <p class="desc">Copy the current ledger state as Markdown or CSV for your paper's supplementary materials, or for import into a reference manager. Do this periodically — the ledger only lives in this browser otherwise.</p>
       <div class="vpt-ledger-controls" style="margin-bottom: 12px;">
         <button class="vpt-btn" onclick="exportMarkdown()">Export Markdown</button>
         <button class="vpt-btn" onclick="exportCSV()">Export CSV</button>
@@ -715,12 +739,72 @@
 
   <div class="vpt-footer">
     <span>CC0 — no rights reserved</span>
-    <span>Verification Protocol Toolkit · v2.1</span>
+    <span>Verification Protocol Toolkit · v2.2</span>
   </div>
 </div>
 
 <script>
-  // Tab switching
+  // ---------- persistence ----------
+  const STORAGE_KEY_LEDGER = 'vpt_ledger_data';
+  const STORAGE_KEY_CHECKS = 'vpt_checklist_state';
+
+  function saveLedgerToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY_LEDGER, JSON.stringify(ledgerData));
+      flashSaveStatus();
+    } catch (e) {
+      console.error('Could not save ledger:', e);
+    }
+  }
+
+  function loadLedgerFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_LEDGER);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.error('Could not load ledger:', e);
+      return null;
+    }
+  }
+
+  function flashSaveStatus() {
+    const el = document.getElementById('save-status');
+    if (!el) return;
+    el.textContent = 'Saved';
+    el.classList.add('saved');
+    setTimeout(() => {
+      el.textContent = 'Saved to this browser';
+      el.classList.remove('saved');
+    }, 1200);
+  }
+
+  function saveChecklist() {
+    try {
+      const state = {};
+      document.querySelectorAll('.vpt-checklist input[type="checkbox"]').forEach(cb => {
+        state[cb.id] = cb.checked;
+      });
+      localStorage.setItem(STORAGE_KEY_CHECKS, JSON.stringify(state));
+    } catch (e) {
+      console.error('Could not save checklist state:', e);
+    }
+  }
+
+  function loadChecklist() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_CHECKS);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      Object.keys(state).forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb) cb.checked = state[id];
+      });
+    } catch (e) {
+      console.error('Could not load checklist state:', e);
+    }
+  }
+
+  // ---------- tabs ----------
   function switchTab(id) {
     document.querySelectorAll('.vpt-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.vpt-panel').forEach(p => p.classList.remove('active'));
@@ -728,48 +812,97 @@
     document.getElementById('panel-' + id).classList.add('active');
   }
 
-  // Triage logic
+  // ---------- triage ----------
   const triageData = {
     p0: {
+      label: 'P0 — Design-critical',
       steps: 'All 7 failure mode checklists + primary-source handshake + exact location match + synthetic validation (if computational)',
       closure: 'Human domain expert or primary source only',
       time: '45–90 minutes per claim',
-      fields: 'All fields mandatory: Claim, DOI, Exact Location, Method, Status, Strength, Discrepancy'
+      fields: 'All fields mandatory: Claim, DOI, Exact Location, Method, Status, Strength, Discrepancy',
+      method: 'Primary-source handshake + synthetic validation'
     },
     p1: {
+      label: 'P1 — Supporting',
       steps: 'DOI resolution + exact location check + claim tagging + one adversarial query',
       closure: 'Primary source or reproducible computation',
       time: '15–30 minutes per claim',
-      fields: 'Claim, DOI, Location, Status, Strength required; Discrepancy if applicable'
+      fields: 'Claim, DOI, Location, Status, Strength required; Discrepancy if applicable',
+      method: 'DOI resolution + claim tagging'
     },
     p2: {
+      label: 'P2 — Background',
       steps: 'DOI resolution + quick skim for relevance',
       closure: 'Independent retrieval system acceptable',
       time: '5–10 minutes per claim',
-      fields: 'Claim, DOI, Status required; others optional'
+      fields: 'Claim, DOI, Status required; others optional',
+      method: 'DOI resolution, quick skim'
     }
   };
+
+  let selectedTriageLevel = null;
 
   function selectTriage(level, el) {
     document.querySelectorAll('.vpt-triage-card').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
+    selectedTriageLevel = level;
     const d = triageData[level];
     document.getElementById('tr-steps').textContent = d.steps;
     document.getElementById('tr-closure').textContent = d.closure;
     document.getElementById('tr-time').textContent = d.time;
     document.getElementById('tr-fields').textContent = d.fields;
+    document.getElementById('triage-add').classList.add('visible');
   }
 
-  // Ledger logic
+  function addTriagedClaim() {
+    if (!selectedTriageLevel) return;
+    const d = triageData[selectedTriageLevel];
+    const newRow = {
+      claim: '',
+      priority: selectedTriageLevel.toUpperCase(),
+      doi: '',
+      location: '',
+      method: d.method,
+      status: 'Open',
+      strength: 'Unverified',
+      discrepancy: ''
+    };
+    ledgerData.push(newRow);
+    saveLedgerToStorage();
+    renderLedger(ledgerData.length - 1);
+
+    // jump to ledger tab and focus the new claim field
+    document.querySelectorAll('.vpt-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.vpt-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.vpt-tab')[3].classList.add('active');
+    document.getElementById('panel-ledger').classList.add('active');
+
+    setTimeout(() => {
+      const firstInput = document.querySelector('#ledger-body tr:last-child input');
+      if (firstInput) firstInput.focus();
+    }, 50);
+  }
+
+  // ---------- ledger ----------
   let ledgerData = [];
 
-  function renderLedger() {
+  function renderLedger(highlightIdx) {
     const tbody = document.getElementById('ledger-body');
     tbody.innerHTML = '';
     ledgerData.forEach((row, idx) => {
       const tr = document.createElement('tr');
+      if (idx === highlightIdx) tr.classList.add('just-added');
+      const priority = row.priority || '';
       tr.innerHTML = `
         <td><input value="${escapeHtml(row.claim)}" onchange="updateLedger(${idx}, 'claim', this.value)" placeholder="Claim text"></td>
+        <td>
+          <select onchange="updateLedger(${idx}, 'priority', this.value)">
+            <option value="" ${priority===''?'selected':''}>—</option>
+            <option value="P0" ${priority==='P0'?'selected':''}>P0</option>
+            <option value="P1" ${priority==='P1'?'selected':''}>P1</option>
+            <option value="P2" ${priority==='P2'?'selected':''}>P2</option>
+          </select>
+        </td>
         <td><input value="${escapeHtml(row.doi)}" onchange="updateLedger(${idx}, 'doi', this.value)" placeholder="10.xxxx/..." class="mono"></td>
         <td><input value="${escapeHtml(row.location)}" onchange="updateLedger(${idx}, 'location', this.value)" placeholder="Fig 3b, Table 4..."></td>
         <td><input value="${escapeHtml(row.method)}" onchange="updateLedger(${idx}, 'method', this.value)" placeholder="Primary-source handshake"></td>
@@ -802,66 +935,94 @@
   }
 
   function addLedgerRow() {
-    ledgerData.push({ claim:'', doi:'', location:'', method:'', status:'Open', strength:'Unverified', discrepancy:'' });
-    renderLedger();
+    ledgerData.push({ claim:'', priority:'', doi:'', location:'', method:'', status:'Open', strength:'Unverified', discrepancy:'' });
+    saveLedgerToStorage();
+    renderLedger(ledgerData.length - 1);
   }
 
   function updateLedger(idx, field, value) {
     ledgerData[idx][field] = value;
+    saveLedgerToStorage();
+    // re-render only to keep dropdowns in sync; no need to re-highlight
     renderLedger();
   }
 
   function deleteLedgerRow(idx) {
     ledgerData.splice(idx, 1);
+    saveLedgerToStorage();
     renderLedger();
   }
 
   function clearLedger() {
+    if (ledgerData.length && !confirm('Clear all claims from the ledger? This cannot be undone.')) return;
     ledgerData = [];
+    saveLedgerToStorage();
     renderLedger();
   }
 
   function loadDemoData() {
+    if (ledgerData.length && !confirm('Load demo data? This will replace your current ledger.')) return;
     ledgerData = [
-      { claim:'Bandgap = 1.42 eV', doi:'10.1038/xxxxx', location:'Fig. 3b', method:'Primary-source handshake', status:'Closed', strength:'Directly supported', discrepancy:'None' },
-      { claim:'Yield increase +15%', doi:'10.1016/xxxxx', location:'Table 4', method:'Direct PDF inspection', status:'Rejected', strength:'Unverified', discrepancy:'Inverted claim — source reports decrease of 8%' },
-      { claim:'Endurance >10⁸ cycles', doi:'10.1002/xxxxx', location:'Table 2, row 4', method:'Expert review pending', status:'Open', strength:'Unverified', discrepancy:'Pending' },
-      { claim:'Thermal conductivity ~2000 W/m·K', doi:'10.1021/xxxxx', location:'Sec. 3.2', method:'Primary-source handshake', status:'Closed', strength:'Inferential', discrepancy:'Partial — related but non-identical sample geometry' }
+      { claim:'Bandgap = 1.42 eV', priority:'P0', doi:'10.1038/xxxxx', location:'Fig. 3b', method:'Primary-source handshake', status:'Closed', strength:'Directly supported', discrepancy:'None' },
+      { claim:'Yield increase +15%', priority:'P0', doi:'10.1016/xxxxx', location:'Table 4', method:'Direct PDF inspection', status:'Rejected', strength:'Unverified', discrepancy:'Inverted claim — source reports decrease of 8%' },
+      { claim:'Endurance >10⁸ cycles', priority:'P1', doi:'10.1002/xxxxx', location:'Table 2, row 4', method:'Expert review pending', status:'Open', strength:'Unverified', discrepancy:'Pending' },
+      { claim:'Thermal conductivity ~2000 W/m·K', priority:'P1', doi:'10.1021/xxxxx', location:'Sec. 3.2', method:'Primary-source handshake', status:'Closed', strength:'Inferential', discrepancy:'Partial — related but non-identical sample geometry' }
     ];
+    saveLedgerToStorage();
     renderLedger();
   }
 
-  // Export logic
+  // ---------- export ----------
   function exportMarkdown() {
     let md = '# Verification Ledger\n\n';
-    md += '| Claim | Source (DOI) | Exact Location | Method | Status | Strength | Discrepancy |\n';
-    md += '|-------|-------------|----------------|--------|--------|----------|-------------|\n';
+    md += '| Claim | Priority | Source (DOI) | Exact Location | Method | Status | Strength | Discrepancy |\n';
+    md += '|-------|----------|-------------|----------------|--------|--------|----------|-------------|\n';
     ledgerData.forEach(r => {
-      md += `| ${r.claim} | ${r.doi} | ${r.location} | ${r.method} | ${r.status} | ${r.strength} | ${r.discrepancy} |\n`;
+      md += `| ${r.claim} | ${r.priority||''} | ${r.doi} | ${r.location} | ${r.method} | ${r.status} | ${r.strength} | ${r.discrepancy} |\n`;
     });
     document.getElementById('export-area').value = md;
   }
 
   function exportCSV() {
-    let csv = 'Claim,Source (DOI),Exact Location,Method,Status,Strength,Discrepancy\n';
+    let csv = 'Claim,Priority,Source (DOI),Exact Location,Method,Status,Strength,Discrepancy\n';
     ledgerData.forEach(r => {
-      csv += `"${r.claim}","${r.doi}","${r.location}","${r.method}","${r.status}","${r.strength}","${r.discrepancy}"\n`;
+      csv += `"${r.claim}","${r.priority||''}","${r.doi}","${r.location}","${r.method}","${r.status}","${r.strength}","${r.discrepancy}"\n`;
     });
     document.getElementById('export-area').value = csv;
   }
 
-  function copyExport() {
+  async function copyExport() {
     const area = document.getElementById('export-area');
-    area.select();
-    document.execCommand('copy');
     const btn = event.target;
     const old = btn.textContent;
-    btn.textContent = 'Copied!';
+    try {
+      await navigator.clipboard.writeText(area.value);
+      btn.textContent = 'Copied!';
+    } catch (e) {
+      // fallback for browsers/contexts without Clipboard API access
+      area.select();
+      try {
+        document.execCommand('copy');
+        btn.textContent = 'Copied!';
+      } catch (e2) {
+        btn.textContent = 'Copy failed — select & copy manually';
+      }
+    }
     setTimeout(() => btn.textContent = old, 1500);
   }
 
-  // Init
-  loadDemoData();
+  // ---------- init ----------
+  (function init() {
+    const saved = loadLedgerFromStorage();
+    if (saved && saved.length) {
+      ledgerData = saved;
+    } else {
+      loadDemoData();
+      return; // loadDemoData already renders
+    }
+    renderLedger();
+    loadChecklist();
+  })();
 </script>
 
 </body>
